@@ -118,43 +118,9 @@ void InitializeInventory()
     fclose(inventory);
     WriteToLog("inventory updated.");
 }
-int UpdateInventory(const char* productname, int quantity) {
-    FILE* inventory = fopen(INVENTORY_FILE, "r+b");
-    if (!inventory) {
-        printf("Error opening inventory file!\n");
-        return 0;
-    }
-
-    Inventoryitem tempItem;
-
-    while (fread(&tempItem, sizeof(Inventoryitem), 1, inventory)) {
-        if (strcmp(tempItem.productname, productname) == 0) {
-            if (tempItem.quantity >= quantity)
-            {
-                tempItem.quantity -= quantity;
-                fseek(inventory, -(long)sizeof(Inventoryitem), SEEK_CUR);
-                fwrite(&tempItem, sizeof(Inventoryitem), 1, inventory);
-                fclose(inventory);
-                return 1;
-            }
-            else
-            {
-                printf("Not enough stock for %s! Only %d left.\n", productname, tempItem.quantity);
-                fclose(inventory);
-                return 0;
-            }
-        }
-    }
-
-    fclose(inventory);
-    printf("Product %s not found in inventory!\n", productname);
-    return 0;
-}
-void DisplayInventory(FILE* inventory) {
+void DisplayInventory(void) {
 	Inventoryitem product;
-	(void)inventory; /* file pointer is not reused — open by name */
-
-	inventory = fopen(INVENTORY_FILE, "rb");
+	FILE* inventory = fopen(INVENTORY_FILE, "rb");
 	if (!inventory) {
 		printf("Error opening inventory file!\n");
 		return;
@@ -192,11 +158,10 @@ void trimWhitespace(char* str) {
 	*(end + 1) = '\0';
 }
 
-void createDefaultAdmin(FILE* fEmployees)
+void createDefaultAdmin(void)
 {
     Employee Admin;
-    (void)fEmployees;
-    fEmployees = fopen(EMPLOYEES_FILE, "w");
+    FILE* fEmployees = fopen(EMPLOYEES_FILE, "w");
     if (fEmployees == NULL)
     {
         printf("Error opening file!\n");
@@ -214,9 +179,8 @@ void createDefaultAdmin(FILE* fEmployees)
     fclose(fEmployees);
     WriteToLog("added admin user.");
 }
-Employee login(FILE* fEmployee) {
-	(void)fEmployee;
-	fEmployee = fopen(EMPLOYEES_FILE, "r");
+Employee login(void) {
+	FILE* fEmployee = fopen(EMPLOYEES_FILE, "r");
 	if (fEmployee == NULL) {
 		printf("Failed to open file!\n");
 		WriteToLog("Error opening employee file.");
@@ -274,15 +238,14 @@ Employee login(FILE* fEmployee) {
 	fclose(fEmployee);
 	exit(1);
 }
-void AddNewEmployee(unsigned int employeelevel, FILE* fEmployees)
+void AddNewEmployee(unsigned int employeelevel)
 {
     int level = employeelevel;
 	int value;
     if (level == 1)
     {
         Employee New, existing;
-        (void)fEmployees;
-        fEmployees = fopen(EMPLOYEES_FILE, "a+");
+        FILE* fEmployees = fopen(EMPLOYEES_FILE, "a+");
         if (fEmployees == NULL)
         {
             printf("Error opening file!\n");
@@ -335,10 +298,9 @@ void AddNewEmployee(unsigned int employeelevel, FILE* fEmployees)
         return;
     }
 }
-void BlockEmployee(FILE* fEmployee)
+void BlockEmployee(void)
 {
-	(void)fEmployee;
-	fEmployee = fopen(EMPLOYEES_FILE, "r");
+	FILE* fEmployee = fopen(EMPLOYEES_FILE, "r");
 	if (fEmployee == NULL) {
 		printf("Error: Could not open Employee.txt for reading!\n");
 		return;
@@ -403,16 +365,15 @@ void BlockEmployee(FILE* fEmployee)
 	printf("User '%s' has been blocked successfully!\n", targetUsername);
 }
 
-void AddClient(FILE* clients, FILE* items)
+void AddClient(void)
 {
-	(void)clients; (void)items;
-	clients = fopen(CLIENTS_FILE, "a");
+	FILE* clients = fopen(CLIENTS_FILE, "a");
 	if (clients == NULL) {
 		printf("Error: Could not open clients file for writing!\n");
 		return;
 	}
 
-	items = fopen(ITEMS_FILE, "ab");
+	FILE* items = fopen(ITEMS_FILE, "ab");
 	if (items == NULL) {
 		printf("Error: Could not open items file for writing!\n");
 		fclose(clients);
@@ -463,14 +424,14 @@ void AddClient(FILE* clients, FILE* items)
 
 	printf("Client and car added successfully!\n");
 }
-void findbynumberplate(FILE* clients, FILE* items)
+void findbynumberplate(void)
 {
 	Client findclient;
 	printf("please enter plate number:\n");
-	scanf("%s", findclient.numberplate);
+	scanf("%9s", findclient.numberplate);
 
-	clients = fopen(CLIENTS_FILE, "r");
-	items = fopen(ITEMS_FILE, "rb");
+	FILE* clients = fopen(CLIENTS_FILE, "r");
+	FILE* items = fopen(ITEMS_FILE, "rb");
 
 	if (clients == NULL || items == NULL)
 	{
@@ -550,10 +511,9 @@ int CompareByDate(const void* a, const void* b)
 
 	return dateA - dateB;
 }
-void SortClientsByDate(FILE* clients)
+void SortClientsByDate(void)
 {
-	(void)clients;
-	clients = fopen(CLIENTS_FILE, "r");
+	FILE* clients = fopen(CLIENTS_FILE, "r");
 	if (clients == NULL)
 	{
 		printf("Error opening client file!\n");
@@ -611,33 +571,7 @@ void SortClientsByDate(FILE* clients)
 	printf("Clients sorted by registration date successfully!\n");
 }
 
-bool GetClientNameByNumberPlate(FILE* clients, const char* carnumberplate, char* clientsname)
-{
-	(void)clients;
-	clients = fopen(CLIENTS_FILE, "r");
-	if (clients == NULL)
-	{
-		printf("Error opening clients file!\n");
-		WriteToLog("Error opening clients file.");
-		return false;
-	}
-	Client readclient;
-	int inservice_int;
-	while (fscanf(clients, "%s %s %d %f %s", readclient.name, readclient.date, &inservice_int, &readclient.totalspent, readclient.numberplate) == 5)
-	{
-		if (strcmp(readclient.numberplate, carnumberplate) == 0)
-		{
-			strcpy(clientsname, readclient.name);
-			fclose(clients);
-			WriteToLog("found client.");
-			return true;
-		}
-	}
-	fclose(clients);
-	return false;
-}
-void AddSaleToClient(FILE* sales, FILE* clients, FILE* inventory) {
-	(void)sales; (void)clients; (void)inventory;
+void AddSaleToClient(void) {
 	char numberplate[10];
 	printf("Enter client number plate: ");
 	scanf("%9s", numberplate);
@@ -648,7 +582,7 @@ void AddSaleToClient(FILE* sales, FILE* clients, FILE* inventory) {
 	int purchaseCount = 0;
 	Sale tempSale;
 
-	sales = fopen(SALES_FILE, "rb+");
+	FILE* sales = fopen(SALES_FILE, "rb+");
 	if (!sales) {
 		sales = fopen(SALES_FILE, "wb+");
 	}
@@ -658,7 +592,7 @@ void AddSaleToClient(FILE* sales, FILE* clients, FILE* inventory) {
 		return;
 	}
 
-	inventory = fopen(INVENTORY_FILE, "rb+");
+	FILE* inventory = fopen(INVENTORY_FILE, "rb+");
 	if (!inventory) {
 		printf("Error opening inventory file!\n");
 		WriteToLog("Error opening inventory file.");
@@ -679,7 +613,7 @@ void AddSaleToClient(FILE* sales, FILE* clients, FILE* inventory) {
 		return;
 	}
 
-	DisplayInventory(inventory);
+	DisplayInventory();
 
 	int totalItemsPurchased = 0;
 	float totalCost = 0.0;
@@ -753,7 +687,7 @@ void AddSaleToClient(FILE* sales, FILE* clients, FILE* inventory) {
 	fclose(inventory);
 	fclose(sales);
 
-	clients = fopen(CLIENTS_FILE, "r");
+	FILE* clients = fopen(CLIENTS_FILE, "r");
 	if (!clients) {
 		printf("Error opening clients file.\n");
 		return;
@@ -783,20 +717,14 @@ void AddSaleToClient(FILE* sales, FILE* clients, FILE* inventory) {
 
 	printf("Client's total spent updated successfully.\n");
 }
-void RemoveClient(FILE* fclients)
+static int RemoveClientFromList(const char* numberplate)
 {
-	(void)fclients;
-	FILE* tempFile;
 	Client temp;
-	char numberplatetoremove[10];
 	int found = 0;
 	int inservice_int;
 
-	printf("Enter the number plate of the client to remove: \n");
-	scanf("%9s", numberplatetoremove);
-
-	fclients = fopen(CLIENTS_FILE, "r");
-	tempFile = fopen("Temp.txt", "w");
+	FILE* fclients = fopen(CLIENTS_FILE, "r");
+	FILE* tempFile = fopen("Temp.txt", "w");
 
 	if (!fclients || !tempFile)
 	{
@@ -804,7 +732,7 @@ void RemoveClient(FILE* fclients)
 		WriteToLog("error opening files.");
 		if (fclients) fclose(fclients);
 		if (tempFile) fclose(tempFile);
-		return;
+		return 0;
 	}
 
 	while (fscanf(fclients, "%19s %10s %d %f %9s",
@@ -812,7 +740,7 @@ void RemoveClient(FILE* fclients)
 		&temp.totalspent, temp.numberplate) == 5)
 	{
 		temp.inservice = (inservice_int != 0);
-		if (strcmp(temp.numberplate, numberplatetoremove) == 0)
+		if (strcmp(temp.numberplate, numberplate) == 0)
 		{
 			found = 1;
 			continue;
@@ -828,34 +756,25 @@ void RemoveClient(FILE* fclients)
 	{
 		remove(CLIENTS_FILE);
 		rename("Temp.txt", CLIENTS_FILE);
-		printf("Client with number plate %s removed successfully!\n", numberplatetoremove);
-		WriteToLog("client removed.");
 	}
 	else
 	{
 		remove("Temp.txt");
-		printf("Client not found.\n");
-		WriteToLog("client to remove not found.");
 	}
+	return found;
 }
-void RemoveClientSales(FILE* fsales, FILE* fitems) {
-	FILE* tempSales, * tempItems;
+
+static void RemoveClientVehicleAndSales(const char* numberplate) {
 	Sale tempsale;
 	Item tempitem;
-	int foundItem = 0, foundSale = 0;
-	char numberplate[10];
 
-	printf("Please enter the number plate:\n");
-	scanf("%9s", numberplate);
-
-	fsales = fopen(SALES_FILE, "rb");
-	fitems = fopen(ITEMS_FILE, "rb");
-	tempSales = fopen("temp_sales.bin", "wb");
-	tempItems = fopen("temp_items.bin", "wb");
+	FILE* fsales = fopen(SALES_FILE, "rb");
+	FILE* fitems = fopen(ITEMS_FILE, "rb");
+	FILE* tempSales = fopen("temp_sales.bin", "wb");
+	FILE* tempItems = fopen("temp_items.bin", "wb");
 
 	if (!fsales || !fitems || !tempSales || !tempItems) {
-		printf("Error opening files!\n");
-		WriteToLog("Error opening files in RemoveClientSales.");
+		WriteToLog("Error opening files in RemoveClientVehicleAndSales.");
 		if (fsales) fclose(fsales);
 		if (fitems) fclose(fitems);
 		if (tempSales) fclose(tempSales);
@@ -864,18 +783,12 @@ void RemoveClientSales(FILE* fsales, FILE* fitems) {
 	}
 
 	while (fread(&tempitem, sizeof(Item), 1, fitems)) {
-		if (strcmp(tempitem.numberplate, numberplate) == 0) {
-			foundItem = 1;
-			continue;
-		}
+		if (strcmp(tempitem.numberplate, numberplate) == 0) continue;
 		fwrite(&tempitem, sizeof(Item), 1, tempItems);
 	}
 
 	while (fread(&tempsale, sizeof(Sale), 1, fsales)) {
-		if (strcmp(tempsale.numberplate, numberplate) == 0) {
-			foundSale = 1;
-			continue;
-		}
+		if (strcmp(tempsale.numberplate, numberplate) == 0) continue;
 		fwrite(&tempsale, sizeof(Sale), 1, tempSales);
 	}
 
@@ -884,19 +797,25 @@ void RemoveClientSales(FILE* fsales, FILE* fitems) {
 	fclose(tempSales);
 	fclose(tempItems);
 
-	if (foundItem || foundSale) {
-		remove(SALES_FILE);
-		rename("temp_sales.bin", SALES_FILE);
-		remove(ITEMS_FILE);
-		rename("temp_items.bin", ITEMS_FILE);
-		printf("All data for client with number plate %s has been removed.\n", numberplate);
-		WriteToLog("Client data removed.");
+	remove(SALES_FILE);
+	rename("temp_sales.bin", SALES_FILE);
+	remove(ITEMS_FILE);
+	rename("temp_items.bin", ITEMS_FILE);
+}
+
+void RemoveClient(void) {
+	char numberplate[10];
+	printf("Enter the number plate of the client to remove:\n");
+	scanf("%9s", numberplate);
+
+	if (RemoveClientFromList(numberplate)) {
+		RemoveClientVehicleAndSales(numberplate);
+		printf("Client %s and all associated data removed successfully.\n", numberplate);
+		WriteToLog("client removed.");
 	}
 	else {
-		remove("temp_sales.bin");
-		remove("temp_items.bin");
-		printf("No records found for this client.\n");
-		WriteToLog("No records found for client.");
+		printf("Client not found.\n");
+		WriteToLog("client to remove not found.");
 	}
 }
 int CalculateDaysDifference(const char* saledate)
@@ -918,7 +837,7 @@ int CalculateDaysDifference(const char* saledate)
 	double difference = difftime(current_time, sale_time) / (60 * 60 * 24);
 	return (int)difference;
 }
-void ReturnSale(FILE* sales, FILE* inventory) {
+void ReturnSale(void) {
 	char numberplate[10];
 	char productname[25];
 	int found = 0;
@@ -932,9 +851,8 @@ void ReturnSale(FILE* sales, FILE* inventory) {
 	fgets(productname, sizeof(productname), stdin);
 	productname[strcspn(productname, "\n")] = '\0';
 
-	(void)sales; (void)inventory;
 	FILE* tempfile = fopen("temp_sales.bin", "wb");
-	sales = fopen(SALES_FILE, "rb");
+	FILE* sales = fopen(SALES_FILE, "rb");
 
 	if (!sales || !tempfile) {
 		printf("Error opening sales file!\n");
@@ -955,7 +873,7 @@ void ReturnSale(FILE* sales, FILE* inventory) {
 				printf("Product %s has been successfully returned!\n", productname);
 				WriteToLog("Product returned successfully.");
 
-				inventory = fopen(INVENTORY_FILE, "rb+");
+				FILE* inventory = fopen(INVENTORY_FILE, "rb+");
 				if (!inventory) {
 					printf("Error opening inventory file!\n");
 					WriteToLog("Error opening inventory file.");
@@ -1009,15 +927,14 @@ void ReturnSale(FILE* sales, FILE* inventory) {
 		printf("Sale not found or return period exceeded.\n");
 	}
 }
-void ViewClientSales(FILE* sales) {
+void ViewClientSales(void) {
 	char numberplate[10];
 	int found = 0;
 
 	printf("Please enter the client number plate: \n");
 	scanf("%9s", numberplate);
 
-	(void)sales;
-	sales = fopen(SALES_FILE, "rb");
+	FILE* sales = fopen(SALES_FILE, "rb");
 	if (!sales) {
 		printf("Error opening sales file!\n");
 		WriteToLog("Error opening sales file.");
@@ -1047,15 +964,14 @@ void ViewClientSales(FILE* sales) {
 		printf("------------------------------------------------------------\n");
 	}
 }
-void CheckExitDate(FILE* items) {
+void CheckExitDate(void) {
 	char numberplate[10];
 	int found = 0;
 
 	printf("Enter the number plate of the vehicle: ");
-	scanf("%9s", numberplate);  
+	scanf("%9s", numberplate);
 
-	(void)items;
-	items = fopen(ITEMS_FILE, "rb");
+	FILE* items = fopen(ITEMS_FILE, "rb");
 	if (!items) {
 		printf("Error opening items file!\n");
 		WriteToLog("Error opening items file.");
@@ -1089,141 +1005,120 @@ void CheckExitDate(FILE* items) {
 		WriteToLog("Exit date check failed.");
 	}
 }
-void AdminMenu(FILE* employees, FILE* clients, FILE* items, FILE* inventory, FILE* sales) {
+void AdminMenu(void) {
 	int choice;
 	do {
 		printf("\n=== Admin Menu (Level 1) ===\n");
-		printf("1. Add Employee\n");
-		printf("2. Block Employee\n");
-		printf("3. Add Client\n");
-		printf("4. View Client Sales\n");
-		printf("5. Check Vehicle Exit Date\n");
-		printf("6. Return Sale\n");
-		printf("7. Add Sale\n");
-		printf("8. Display Inventory\n");
-		printf("9. Exit\n");
+		printf(" 1. Add Employee\n");
+		printf(" 2. Block Employee\n");
+		printf(" 3. Add Client\n");
+		printf(" 4. Remove Client (with vehicles & sales)\n");
+		printf(" 5. Find Client by Number Plate\n");
+		printf(" 6. Sort Clients by Registration Date\n");
+		printf(" 7. View Client Sales\n");
+		printf(" 8. Check Vehicle Exit Date\n");
+		printf(" 9. Add Sale\n");
+		printf("10. Return Sale\n");
+		printf("11. Display Inventory\n");
+		printf(" 0. Logout\n");
 		printf("Enter your choice: ");
 		scanf("%d", &choice);
 
 		switch (choice) {
-		case 1: AddNewEmployee(1, employees); break;
-		case 2: BlockEmployee(employees); break;
-		case 3: AddClient(clients, items); break;
-		case 4: ViewClientSales(sales); break; 
-		case 5: CheckExitDate(items); break;
-		case 6: ReturnSale(sales, inventory); break; 
-		case 7: AddSaleToClient(sales, clients, inventory); break; 
-		case 8: DisplayInventory(inventory); break;
-		case 9: printf("Logging out...\n"); return;
+		case 1:  AddNewEmployee(1); break;
+		case 2:  BlockEmployee(); break;
+		case 3:  AddClient(); break;
+		case 4:  RemoveClient(); break;
+		case 5:  findbynumberplate(); break;
+		case 6:  SortClientsByDate(); break;
+		case 7:  ViewClientSales(); break;
+		case 8:  CheckExitDate(); break;
+		case 9:  AddSaleToClient(); break;
+		case 10: ReturnSale(); break;
+		case 11: DisplayInventory(); break;
+		case 0:  printf("Logging out...\n"); return;
 		default: printf("Invalid choice. Try again.\n");
 		}
-	} while (choice != 9);
+	} while (choice != 0);
 }
-void EmployeeMenu(FILE* employees, FILE* clients, FILE* items, FILE* inventory, FILE* sales) {
-	(void)employees;
+void EmployeeMenu(void) {
 	int choice;
 	do {
 		printf("\n=== Employee Menu (Level 2) ===\n");
 		printf("1. Add Client\n");
-		printf("2. View Client Sales\n");
-		printf("3. Check Vehicle Exit Date\n");
-		printf("4. Return Sale\n");
+		printf("2. Find Client by Number Plate\n");
+		printf("3. View Client Sales\n");
+		printf("4. Check Vehicle Exit Date\n");
 		printf("5. Add Sale\n");
-		printf("6. Display Inventory\n");
-		printf("7. Exit\n");
+		printf("6. Return Sale\n");
+		printf("7. Display Inventory\n");
+		printf("0. Logout\n");
 		printf("Enter your choice: ");
 		scanf("%d", &choice);
 
 		switch (choice) {
-		case 1: AddClient(clients, items); break;
-		case 2: ViewClientSales(sales); break; 
-		case 3: CheckExitDate(items); break;
-		case 4: ReturnSale(sales, inventory); break; 
-		case 5: AddSaleToClient(sales, clients, inventory); break; 
-		case 6: DisplayInventory(inventory); break;
-		case 7: printf("Logging out...\n"); return;
+		case 1: AddClient(); break;
+		case 2: findbynumberplate(); break;
+		case 3: ViewClientSales(); break;
+		case 4: CheckExitDate(); break;
+		case 5: AddSaleToClient(); break;
+		case 6: ReturnSale(); break;
+		case 7: DisplayInventory(); break;
+		case 0: printf("Logging out...\n"); return;
 		default: printf("Invalid choice. Try again.\n");
 		}
-	} while (choice != 7);
+	} while (choice != 0);
 }
-void PractitionerMenu(FILE* clients, FILE* items, FILE* inventory, FILE* sales) {
+void PractitionerMenu(void) {
 	int choice;
 	do {
 		printf("\n=== Practitioner Menu (Level 3) ===\n");
-		printf("1. Add Client\n");
+		printf("1. Find Client by Number Plate\n");
 		printf("2. View Client Sales\n");
 		printf("3. Check Vehicle Exit Date\n");
 		printf("4. Display Inventory\n");
-		printf("5. Exit\n");
+		printf("0. Logout\n");
 		printf("Enter your choice: ");
 		scanf("%d", &choice);
 
 		switch (choice) {
-		case 1: AddClient(clients, items); break;
-		case 2: ViewClientSales(sales); break; 
-		case 3: CheckExitDate(items); break;
-		case 4: DisplayInventory(inventory); break;
-		case 5: printf("Logging out...\n"); return;
+		case 1: findbynumberplate(); break;
+		case 2: ViewClientSales(); break;
+		case 3: CheckExitDate(); break;
+		case 4: DisplayInventory(); break;
+		case 0: printf("Logging out...\n"); return;
 		default: printf("Invalid choice. Try again.\n");
 		}
-	} while (choice != 5);
+	} while (choice != 0);
 }
-void showMenu() {
-	FILE* employees = fopen(EMPLOYEES_FILE, "r");
-	if (!employees) {
+static void EnsureDataFiles(void) {
+	FILE* f = fopen(EMPLOYEES_FILE, "r");
+	if (!f) {
 		printf("Employee file not found. Creating default admin...\n");
-		createDefaultAdmin(NULL);
-	}
-	else {
-		fclose(employees);
-	}
-
-	FILE* clients = fopen(CLIENTS_FILE, "r");
-	if (!clients) {
-		printf("Client file not found. Creating an empty file...\n");
-		clients = fopen(CLIENTS_FILE, "w");
-		if (clients) fclose(clients);
-	}
-	else {
-		fclose(clients);
+		createDefaultAdmin();
+	} else {
+		fclose(f);
 	}
 
-	FILE* items = fopen(ITEMS_FILE, "rb");
-	if (!items) {
-		printf("Items file not found. Initializing vehicle database...\n");
-		items = fopen(ITEMS_FILE, "wb");
-		if (items) fclose(items);
-	}
-	else {
-		fclose(items);
-	}
-
-	FILE* inventory = fopen(INVENTORY_FILE, "rb");
-	if (!inventory) {
+	f = fopen(INVENTORY_FILE, "rb");
+	if (!f) {
 		printf("Inventory file not found. Initializing inventory database...\n");
 		InitializeInventory();
+	} else {
+		fclose(f);
 	}
-	else {
-		fclose(inventory);
-	}
+}
 
-	FILE* sales = fopen(SALES_FILE, "rb");
-	if (!sales) {
-		printf("Sales file not found. Creating sales database...\n");
-		sales = fopen(SALES_FILE, "wb");
-		if (sales) fclose(sales);
-	}
-	else {
-		fclose(sales);
-	}
+void showMenu(void) {
+	EnsureDataFiles();
 
 	printf("\n=== Login ===\n");
-	Employee loggedInEmployee = login(NULL);
+	Employee loggedInEmployee = login();
 
 	switch (loggedInEmployee.level) {
-	case 1: AdminMenu(NULL, NULL, NULL, NULL, NULL); break;
-	case 2: EmployeeMenu(NULL, NULL, NULL, NULL, NULL); break;
-	case 3: PractitionerMenu(NULL, NULL, NULL, NULL); break;
+	case 1: AdminMenu(); break;
+	case 2: EmployeeMenu(); break;
+	case 3: PractitionerMenu(); break;
 	default: printf("Invalid credentials. Exiting.\n");
 	}
 }

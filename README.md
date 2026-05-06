@@ -23,8 +23,8 @@ a daily purchase limit, a 14-day return window, and an append-only audit log.
 ### Customers & Vehicles
 - Add customers together with their vehicle (plate, brand, color, entry/exit dates).
 - Lookup a customer and their vehicle by license plate.
-- Sort the customer file by registration date (`qsort` with a custom comparator).
-- Remove a customer and cascade-remove their vehicles and sales.
+- Sort the customers file by registration date (`qsort` with a custom comparator).
+- Remove a customer — cascades to their vehicles and sales in one operation.
 
 ### Inventory & Sales
 - Pre-seeded inventory of 20 common auto-parts (oil, filters, brake pads, tires…).
@@ -102,16 +102,19 @@ Please enter password:
 Hi maneger!
 
 === Admin Menu (Level 1) ===
-1. Add Employee
-2. Block Employee
-3. Add Client
-4. View Client Sales
-5. Check Vehicle Exit Date
-6. Return Sale
-7. Add Sale
-8. Display Inventory
-9. Exit
-Enter your choice: 8
+ 1. Add Employee
+ 2. Block Employee
+ 3. Add Client
+ 4. Remove Client (with vehicles & sales)
+ 5. Find Client by Number Plate
+ 6. Sort Clients by Registration Date
+ 7. View Client Sales
+ 8. Check Vehicle Exit Date
+ 9. Add Sale
+10. Return Sale
+11. Display Inventory
+ 0. Logout
+Enter your choice: 11
 
 Available products:
 ------------------------------------------------------
