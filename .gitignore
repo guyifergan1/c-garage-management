@@ -1,0 +1,38 @@
+# Build artifacts
+*.exe
+*.obj
+*.o
+*.out
+*.pdb
+*.ilk
+*.idb
+*.exp
+*.lib
+*.a
+
+# Runtime data files (created on first run)
+log.txt
+Employee.txt
+clients.txt
+items.bin
+inventory.bin
+sales.bin
+temp_*.txt
+temp_*.bin
+Temp.txt
+
+# IDE / editor
+.vs/
+.vscode/
+*.suo
+*.user
+*.sln
+*.vcxproj*
+.idea/
+*.swp
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
